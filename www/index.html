@@ -1,0 +1,62 @@
+<html ng-app="gochat">
+<head>
+  <title>GoChat</title>
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+  <style>
+    #messages {
+      height: 400px;
+      overflow: scroll;
+    }
+  </style>
+</head>
+<body ng-controller="MainCtl">
+  <h1>GoChat</h1>
+  <div id="messages">
+    <ul>
+      <li ng-repeat="message in messages">{{message}}</li>
+    </ul>
+  </div>
+  <!--<form action="#">-->
+    <input type="text" placeholder="type here" ng-model="msg" ng-enter="send()">
+    <button class="btn btn-primary" ng-click="send()">Send</button>
+  <!--</form>-->
+
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+  <script>
+    var app = angular.module("gochat", []);
+
+    app.controller("MainCtl", ["$scope", function($scope) {
+      $scope.messages = [];
+
+      var conn = new WebSocket("ws://localhost:9000/ws");
+
+      // called when the server closes the connection
+      conn.onclose = function(e) {
+        $scope.$apply(function(){
+          $scope.messages.push("DISCONNECTED");
+        });
+      };
+
+      // called when the connection to the server is made
+      conn.onopen = function(e) {
+        $scope.$apply(function(){
+          $scope.messages.push("CONNECTED");
+        })
+      };
+
+      // called when a message is received from the server
+      conn.onmessage = function(e){
+        $scope.$apply(function(){
+          $scope.messages.push(e.data);
+        });
+      };
+
+      $scope.send = function() {
+        console.log($scope.msg);
+        conn.send($scope.msg);
+        $scope.msg = "";
+      }
+    }]);
+  </script>
+</body>
+</html>
