@@ -21,12 +21,19 @@
     <button class="btn btn-primary" ng-click="send()">Send</button>
   <!--</form>-->
 
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
   <script>
     var app = angular.module("gochat", []);
 
     app.controller("MainCtl", ["$scope", function($scope) {
       $scope.messages = [];
+
+      $.getJSON("http://localhost:9000/messages").success(function(data) {
+        $.each(data.messages, function(i, v) {
+          $scope.messages.push(v.content);
+        });
+      });
 
       var conn = new WebSocket("ws://localhost:9000/ws");
 
